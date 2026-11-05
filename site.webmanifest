@@ -1,0 +1,13 @@
+{
+  "name": "일손덜기 · 소생커뮤니티",
+  "short_name": "일손덜기",
+  "description": "가장 불편한 업무 하나, 작은 앱으로 덜어드립니다.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fbfcf8",
+  "theme_color": "#0f6b40",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

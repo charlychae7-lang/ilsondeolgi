@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>일손덜기 업무진단도구</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f6b40">
+<style>
+:root{
+  --bg:#f6f7f3;--card:#fff;--ink:#1f2a24;--sub:#5d6a62;--line:#dfe4dc;
+  --pri:#1f7a5a;--pri-d:#155a42;--pri-l:#e3f3ec;--acc:#e8a33d;--acc-l:#fdf1dc;--bad:#c4452f;--bad-l:#fbe7e2;
+  --shadow:0 1px 3px rgba(20,40,30,.08);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#121714;--card:#1b231e;--ink:#e8eee9;--sub:#a1aea6;--line:#2c3830;--pri:#4cbf93;--pri-d:#7fd6b3;--pri-l:#1d3a2e;--acc:#e8b05a;--acc-l:#3a2f18;--bad:#ef7a65;--bad-l:#3b1f19;--shadow:none}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;line-height:1.6;font-size:16px}
+header.top{background:var(--pri);color:#fff;padding:14px 16px}
+header.top .in{max-width:860px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.2px}
+header.top small{opacity:.85;display:block;font-weight:400;font-size:12.5px}
+nav.tabs{display:flex;gap:6px}
+nav.tabs button{background:rgba(255,255,255,.15);color:#fff;border:0;padding:7px 12px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+nav.tabs button.on{background:#fff;color:var(--pri-d);font-weight:700}
+main{max-width:860px;margin:0 auto;padding:18px 16px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+h2{font-size:20px;margin:0 0 4px;letter-spacing:-.3px}
+h3{font-size:16px;margin:22px 0 8px;color:var(--pri-d)}
+.hint{color:var(--sub);font-size:14px;margin:0 0 14px}
+.progress{display:flex;gap:6px;margin-bottom:16px}
+.progress div{flex:1;text-align:center;font-size:12.5px;color:var(--sub)}
+.progress i{display:block;height:6px;border-radius:3px;background:var(--line);margin-bottom:5px}
+.progress .done i{background:var(--pri)}
+.progress .cur i{background:var(--acc)}
+.progress .cur{color:var(--ink);font-weight:700}
+label.f{display:block;font-weight:600;font-size:14.5px;margin:14px 0 6px}
+input[type=text],input[type=number],input[type=date],input[type=tel],textarea,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:var(--bg);color:var(--ink)}
+textarea{min-height:84px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--pri);outline-offset:1px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{cursor:pointer;position:relative}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-block;padding:8px 13px;border:1px solid var(--line);border-radius:999px;font-size:14.5px;background:var(--bg);user-select:none}
+.chips input:checked+span{background:var(--pri-l);border-color:var(--pri);color:var(--pri-d);font-weight:600}
+.chips input:focus-visible+span{outline:2px solid var(--pri);outline-offset:2px}
+.typegrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.typebtn{text-align:left;border:2px solid var(--line);border-radius:14px;padding:16px;background:var(--card);color:var(--ink);cursor:pointer;font:inherit}
+.typebtn:hover{border-color:var(--pri)}
+.typebtn.on{border-color:var(--pri);background:var(--pri-l)}
+.typebtn b{display:block;font-size:17px;margin-bottom:4px}
+.typebtn em{font-style:normal;color:var(--sub);font-size:13.5px}
+.typebtn .badge{display:inline-block;background:var(--pri);color:#fff;border-radius:6px;padding:0 8px;font-size:13px;margin-bottom:6px}
+.score{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.score:last-of-type{border-bottom:0}
+.score .t b{display:block;font-size:15px}.score .t span{font-size:13px;color:var(--sub)}
+.rate{display:flex;gap:6px}
+.rate label{position:relative;cursor:pointer}
+.rate input{position:absolute;opacity:0}
+.rate span{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-weight:600}
+.rate input:checked+span{background:var(--pri);border-color:var(--pri);color:#fff}
+.rate input:focus-visible+span{outline:2px solid var(--pri);outline-offset:2px}
+.total{background:var(--pri-l);border-radius:12px;padding:14px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.total b{font-size:24px;color:var(--pri-d)}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.tag.hi{background:var(--pri);color:#fff}.tag.mid{background:var(--acc);color:#2b1d00}.tag.lo{background:var(--line);color:var(--ink)}
+.item{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.item .q{font-size:15px}
+.item .ctl{display:flex;align-items:center;gap:10px}
+.item .rate span{width:34px;height:34px;font-size:14px}
+.help{font-size:13.5px;display:flex;align-items:center;gap:5px;white-space:nowrap;cursor:pointer}
+.help input{width:18px;height:18px;accent-color:var(--pri)}
+@media(max-width:560px){.item,.score{grid-template-columns:1fr}.item .ctl{justify-content:space-between}}
+.others{width:100%;border-collapse:collapse;margin-top:6px}
+.others td,.others th{padding:4px;font-size:13px;text-align:left}
+.others input{padding:8px}
+.ranks{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+.ranks div{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:14.5px}
+.ranks select{width:74px;padding:6px}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:10px}
+button.btn{border:0;border-radius:10px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer;background:var(--pri);color:#fff}
+button.btn:hover{background:var(--pri-d)}
+button.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.btn.ghost:hover{background:var(--pri-l)}
+button.btn.warn{background:var(--bad)}
+button.btn.sm{padding:7px 12px;font-size:13.5px}
+.bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pri)}
+.bar.acc i{background:var(--acc)}
+.kv{display:grid;grid-template-columns:150px 1fr 54px;gap:8px 10px;align-items:center;font-size:14px;margin:6px 0}
+@media(max-width:560px){.kv{grid-template-columns:100px 1fr 44px}}
+.sug{border-left:4px solid var(--pri);background:var(--pri-l);padding:12px 14px;border-radius:0 10px 10px 0;margin:10px 0}
+.sug b{display:block;margin-bottom:2px}
+.sug.warn{border-color:var(--acc);background:var(--acc-l)}
+pre.prompt{white-space:pre-wrap;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:12px;font:inherit;font-size:14px;margin:6px 0}
+.notice{font-size:13px;color:var(--sub);background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:12px}
+table.data{width:100%;border-collapse:collapse;font-size:14px}
+table.data th,table.data td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.data th{color:var(--sub);font-weight:600;font-size:13px}
+.num{text-align:right!important;font-variant-numeric:tabular-nums}
+.empty{text-align:center;color:var(--sub);padding:30px 0}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+footer.foot{background:var(--card);border-top:1px solid var(--line);padding:22px 16px;text-align:center}
+footer.foot .org{font-size:17px;font-weight:700;color:var(--pri-d)}
+footer.foot .sub{font-size:13px;color:var(--sub);margin-top:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+.toast.on{opacity:1}
+.printonly{display:none}
+.guidebtn{background:#fff;color:var(--pri-d);border:0;border-radius:8px;padding:7px 12px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+header.top .lhs{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+dialog#guide{border:0;border-radius:16px;padding:0;max-width:720px;width:calc(100% - 24px);max-height:88vh;background:var(--card);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+dialog#guide::backdrop{background:rgba(0,0,0,.5)}
+.gh{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px 0;z-index:1}
+.gh .tt{display:flex;justify-content:space-between;align-items:center}
+.gh h2{margin:0}
+.gx{border:0;background:var(--bg);color:var(--ink);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer}
+.gtabs{display:flex;gap:4px;margin-top:10px}
+.gtabs button{border:0;background:transparent;font:inherit;font-size:15px;padding:9px 14px;cursor:pointer;color:var(--sub);border-bottom:3px solid transparent}
+.gtabs button.on{color:var(--pri-d);font-weight:700;border-color:var(--pri)}
+.gb{padding:6px 18px 20px;overflow-y:auto;max-height:calc(88vh - 120px)}
+.gb ol,.gb ul{padding-left:20px;margin:6px 0}
+.gb li{margin:4px 0}
+.story{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+.story b.who{display:inline-block;background:var(--pri);color:#fff;border-radius:6px;padding:0 8px;font-size:13px;margin-bottom:6px}
+.story p{margin:2px 0}
+.story .ac{font-size:13.5px;color:var(--sub);margin-top:6px}
+.stepno{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--pri);color:#fff;font-size:13px;font-weight:700;margin-right:6px}
+@media print{
+  header.top,nav.tabs,.nav,.btns,.progress,.noprint,footer .noprint{display:none!important}
+  body{background:#fff;color:#000}.card{box-shadow:none;border:1px solid #bbb;break-inside:avoid}
+  .printonly{display:block}
+  main{padding:0}
+}
+details.opt{margin:14px 0;border:1px dashed var(--line);border-radius:12px;padding:10px 14px}details.opt>summary{cursor:pointer;font-weight:700;color:var(--pri)}</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="lhs"><a href="index.html" title="일손덜기 홈" style="display:inline-flex;align-items:center;gap:6px;font-weight:700;text-decoration:none;color:inherit;margin-right:10px"><img src="favicon.svg" alt="" width="26" height="26">홈</a><button class="guidebtn" id="guideOpen" aria-haspopup="dialog">📖 사용 안내</button>
+  <h1>일손덜기 업무진단도구<small>반복업무 자동화 진단 · 유형별 어려움 체크리스트 · 현장 청취</small></h1></div>
+  <nav class="tabs" id="tabs">
+    <button data-view="survey" class="on">진단하기</button>
+    <button data-view="records">응답 모음·집계</button>
+  </nav>
+</div></header>
+
+<main id="app"></main>
+
+<footer class="foot">
+  <div class="org">소생커뮤니티 · 일손덜기 프로젝트</div>
+  <div class="sub">일손덜기 업무진단도구 · 소생커뮤니티</div>
+  <div class="sub noprint">이 도구에 입력한 내용은 이 기기의 브라우저에만 저장됩니다. 목적 달성 후 파기합니다.</div>
+</footer>
+<dialog id="guide" aria-labelledby="gTitle">
+  <div class="gh">
+    <div class="tt"><h2 id="gTitle">사용 안내</h2><button class="gx" id="guideClose" aria-label="닫기">✕</button></div>
+    <div class="gtabs" role="tablist"><button class="on" data-g="manual" role="tab">사용자 매뉴얼</button><button data-g="story" role="tab">유저 스토리</button></div>
+  </div>
+  <div class="gb" id="g-manual">
+    <h3>이 도구는 무엇인가요?</h3>
+    <p>우리 조직이 <b>AI·자동화로 줄일 수 있는 반복업무</b>를 스스로 확인하고, <b>유형별 어려움</b>을 같은 기준으로 기록하는 진단도구입니다. 약 <b>10분</b>이 걸리며 (필수 항목만 답하면 됩니다), 활동가와 함께 작성하거나 혼자 작성할 수 있습니다.</p>
+    <h3>진행 순서</h3>
+    <ol>
+      <li><b>시작</b> — 우리 기업과 가장 가까운 유형(A 제품 제조·판매 / B 서비스 제공 / C 기타·복합)을 고릅니다. 애매하면 <b>C형</b>을 고르세요.</li>
+      <li><b>1부 기업 현황 (2분)</b> — 기업명, 조직 유형, 연 매출, 업무 도구를 입력합니다. 설립 연도·근로자 수·수입원은 ‘더 자세히 적기’에 있으며 선택입니다.</li>
+      <li><b>2부 자동화 진단 (3분)</b> — “매출·비용 정리와 월간 실적 보고”를 지금 어떻게 하는지 답하고, 5가지 기준을 1~5점으로 평가합니다. 합계가 자동 계산됩니다. (20점 이상 우선 자동화 / 14~19점 일부 자동화 / 13점 이하 현행 유지·간소화)</li>
+      <li><b>3부 어려움 체크리스트 (2분)</b> — 유형별 문항마다 어려움 정도를 1(낮음)~5(매우 높음)로 누르고, 외부 도움이 필요하면 ‘도움 필요’를 체크합니다. 해당 없는 문항은 비워 두고, 누른 점수를 다시 누르면 해제됩니다.</li>
+      <li><b>4부 현장의 어려움 듣기 (3분)</b> — 가장 큰 어려움 3가지 순위, 구체적 상황, 지원사업 경험, AI 활용 수준, 바라는 점을 적고 동의 여부를 체크합니다.</li>
+      <li><b>결과</b> — 맞춤 개선 제안이 바로 나옵니다. ‘개선 제안 1장 인쇄·PDF’로 기업에 전달하고, ‘응답 저장하기’로 기록합니다.</li>
+    </ol>
+    <h3>화면 사용법</h3>
+    <ul>
+      <li>입력 내용은 <b>자동으로 임시 저장</b>됩니다. 창을 닫았다가 다시 열어도 이어서 작성할 수 있습니다.</li>
+      <li>아래쪽 <b>← 이전 / 다음 →</b> 버튼으로 이동합니다. 상단 막대는 현재 단계를 보여줍니다.</li>
+      <li>상단 <b>응답 모음·집계</b> 탭에서 저장한 응답을 보고, 유형별 집계를 확인합니다.</li>
+      <li>집계 화면에서 <b>CSV 내려받기</b>(엑셀에서 열림), <b>백업(JSON)</b>, <b>백업 불러오기</b>, <b>전체 삭제</b>를 할 수 있습니다.</li>
+    </ul>
+    <h3>활동가를 위한 안내</h3>
+    <ul>
+      <li>진단 전 목적·소요 시간·정보 활용 범위를 안내하고 동의를 확인하세요.</li>
+      <li>4부는 설문하듯 묻기보다 대화하며 청취하고 기록합니다.</li>
+      <li>집계는 <b>‘통계 활용 동의’ 응답만</b> 반영됩니다. 소수 응답은 대표성이 낮으므로 ‘경향’으로 해석하고 응답 수를 함께 공개하세요.</li>
+      <li>여러 기업의 응답은 기기마다 따로 저장되므로, 각 기기에서 CSV·백업 파일을 내려받아 한곳에 모으세요.</li>
+    </ul>
+    <h3>꼭 지켜 주세요</h3>
+    <ul>
+      <li><b>계좌번호·주민번호 등 민감한 개인정보는 입력하거나 AI에 붙여넣지 마세요.</b></li>
+      <li>회계 처리의 최종 판단은 세무사 등 전문가나 담당자가 확인합니다.</li>
+      <li>입력 내용은 이 기기의 브라우저에만 저장됩니다. 공용 PC에서는 사용 후 ‘전체 삭제’를 하세요.</li>
+    </ul>
+  </div>
+  <div class="gb" id="g-story" hidden>
+    <p class="hint" style="margin-top:12px">이 도구를 만든 이유와 기대하는 쓰임새입니다.</p>
+    <div class="story"><b class="who">조직 대표·담당자</b>
+      <p>“매달 매출·비용을 정리하고 보고서를 쓰는 데 너무 오래 걸려요. 어느 부분을 자동화할 수 있는지 알고 싶어요.”</p>
+      <div class="ac">✔ 2부 점수로 자동화 적합도가 바로 나온다 ✔ 시간이 드는 단계별 개선 방법과 프롬프트 예시를 받는다 ✔ 결과를 1장으로 인쇄해 둘 수 있다</div></div>
+    <div class="story"><b class="who">기업 담당자</b>
+      <p>“우리 같은 곳이 겪는 어려움을 공공이 알아줬으면 해요. 말로 풀기 어려운 것도 문항으로 짚어 주면 좋겠어요.”</p>
+      <div class="ac">✔ 우리 유형(제조·서비스·복합)에 맞는 문항만 나온다 ✔ 어려움 정도와 도움 필요 여부를 함께 남긴다 ✔ 바라는 점과 후속 상담을 요청할 수 있다</div></div>
+    <div class="story"><b class="who">AI 활동가</b>
+      <p>“기업을 방문했을 때 어떤 순서로 무엇을 물어볼지 공통 틀이 있으면 좋겠어요. 시범 사례를 만들 기업도 고르고 싶어요.”</p>
+      <div class="ac">✔ 10분 안에 4부 구성으로 대화를 이끈다 ✔ 자동화 점수가 높은 기업을 순위로 확인한다 ✔ 현장에서 바로 개선 제안을 전달한다</div></div>
+    <div class="story"><b class="who">일손덜기 담당자</b>
+      <p>“지역 기업의 어려움을 같은 기준으로 모아 지원사업과 정책 제안의 근거로 쓰고 싶어요.”</p>
+      <div class="ac">✔ 유형별 영역 평균·도움 필요 비율·Q1 순위를 집계한다 ✔ 동의한 응답만 통계에 쓰고 응답 수를 함께 밝힌다 ✔ CSV로 내려받아 보고서 작성에 활용한다</div></div>
+    <div class="story"><b class="who">정보 보호가 걱정되는 응답자</b>
+      <p>“내가 쓴 내용이 어디에 쓰이는지, 기업명이 공개되는지 알고 싶어요.”</p>
+      <div class="ac">✔ 통계 활용·사례 공개·후속 연계를 각각 따로 동의한다 ✔ 입력 내용은 이 기기에만 저장되고 직접 삭제할 수 있다</div></div>
+  </div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ───────── 데이터 (기획안·진단지 A/B/C 기준) ───────── */
+const TYPES = {
+  A:{name:'제품 제조·판매형',desc:'식품·공예·생활용품 등 제품을 만들어 판매하는 기업',
+    groups:[
+     ['생산·재고','경영 컨설팅·재고관리 시트 지원',['주문량을 예측해 생산 계획을 세우기 어렵다','원재료·재고를 수기로 파악해 번거롭고 오차가 생긴다','제품별 원가를 계산하고 가격을 정하기 어렵다']],
+     ['판로·유통','공공구매·판로 연계',['안정적인 거래처(납품처)를 확보하기 어렵다','온라인 판매(스마트스토어·쇼핑몰) 운영이 어렵다','공공구매·우선구매 제도를 활용하기 어렵다']],
+     ['홍보·브랜딩','AI 홍보 지원',['제품 소개서·상세페이지 제작이 어렵다','SNS 홍보를 꾸준히 하기 어렵다','사회적 가치를 고객에게 전달하기 어렵다']],
+     ['품질·인증','전문가 상담',['위생·품질 인증과 관련 서류 관리 부담이 크다','포장·디자인 개선에 비용과 전문성이 부족하다']],
+     ['주문·배송·고객','업무 자동화 지원',['주문 접수와 송장 처리 등 반복 작업이 많다','고객 문의·후기 관리에 시간이 많이 든다']],
+     ['인력·자금','교육·인력 매칭·금융 연계',['숙련 인력을 구하고 유지하기 어렵다','설비 투자와 운영자금이 부족하다']]]},
+  B:{name:'서비스 제공형',desc:'돌봄·교육·청소·문화·상담 등 서비스를 제공하는 기업',
+    groups:[
+     ['서비스 기획·이용자 확보','AI 홍보 지원',['이용자를 모집하고 홍보하기 어렵다','서비스 소개자료(안내문·포트폴리오) 제작이 어렵다']],
+     ['이용자·계약 관리','업무 자동화 지원(양식·템플릿)',['이용자 명단·상담·이용 기록을 수기로 관리한다','계약서·견적서·청구서를 매번 새로 작성한다','일정·예약 관리가 복잡하다']],
+     ['인력 운영','업무 자동화·노무 전문가 상담',['근무표 작성과 출퇴근 관리가 번거롭다','인건비·수당 정산에 시간이 많이 든다','서비스 인력의 교육과 이직 관리가 어렵다']],
+     ['서비스 품질·성과','사회적 가치 측정 교육·자료 정리 지원',['만족도 조사를 하고 결과를 정리하기 어렵다','서비스 성과(사회적 성과)를 수치로 보여주기 어렵다']],
+     ['단가·수익 구조','경영 컨설팅·판로 연계',['서비스 단가를 정하기 어렵다','공공 위탁사업 의존도가 높아 수익이 불안정하다']],
+     ['행정·보고','업무 자동화·전문가 상담',['위탁사업 정산·실적 보고 서류 작성 부담이 크다','증빙 서류를 모으고 보관하기 어렵다']]]},
+  C:{name:'기타·복합형',desc:'제조와 서비스를 함께 하거나 교육·문화예술·농업·마을공동체·유통 중개 등 위 두 유형에 딱 맞지 않는 기업',
+    groups:[
+     ['사업 구조','경영 컨설팅',['사업 모델과 수익 구조가 아직 명확하지 않다','여러 사업을 병행해 업무와 인력이 분산된다']],
+     ['조직·의사결정','교육·의사결정 진행 지원',['구성원(조합원·이해관계자)의 의견을 모으고 결정하기 어렵다','총회·이사회 등 회의 운영과 기록이 부담스럽다']],
+     ['협력·네트워크','기관·기업 연계·네트워킹',['다른 조직·기관과 협력 기회를 찾기 어렵다','공공기관·민간기업과의 연계 방법을 모른다']],
+     ['홍보·성과','AI 홍보 지원·성과 측정',['홍보를 전담할 사람이나 시간이 없다','사회적 가치를 측정하고 알리기 어렵다']],
+     ['행정·재무','전문가 상담·업무 자동화 지원',['회계·세무·노무 업무를 감당하기 어렵다','지원사업 신청서·보고서 작성 부담이 크다']],
+     ['디지털 활용','AI 교육·도구 지원',['업무에 쓸 수 있는 디지털 도구를 잘 모른다','구성원 간 디지털 활용 수준 차이가 크다']]]}
+};
+// 문항 평탄화: id = 유형+번호
+for(const k in TYPES){let n=0;TYPES[k].items=[];TYPES[k].groups.forEach(([g,sup,qs])=>qs.forEach(q=>TYPES[k].items.push({id:k+(++n),n,group:g,sup,q})));}
+
+const OPT = {
+  cert:['협동조합','비영리단체','교회·종교기관','소상공인·소기업','마을·지역 커뮤니티','기타'],
+  sales:['5천만 원 미만','5천만~1억','1억~3억','3억~10억','10억 이상'],
+  income:['제품·서비스 판매','공공·위탁사업','보조금·지원사업','후원·기부','기타'],
+  tools:['종이·수기','엑셀·구글시트','회계 프로그램','카카오톡·문자','전문 소프트웨어','AI 도구(챗GPT 등)'],
+  method:['수기 장부','엑셀·구글시트에 직접 입력','회계 프로그램','외부(세무사·회계사)에 맡김','기타'],
+  steps:['영수증·거래명세서 모으기','내용을 엑셀에 옮겨 적기','항목 분류·계정 정리','합계·검산','보고서·정산 서식에 다시 옮기기','보고서 문장 쓰기','제출·공유'],
+  pains:['같은 내용을 여러 번 입력','입력 오류·누락','마감 직전 몰림','담당자 한 명에게 의존','자료가 여러 곳에 흩어짐','양식이 자주 바뀜'],
+  q1:['매출·판로 확보','운영자금·자금 조달','인력 확보·유지','직원 역량·교육','홍보·마케팅','행정·회계·세무·노무','지원사업·제도 정보 부족','기관·기업과의 협력·연계','디지털·AI 활용','사회적 가치의 측정·인정','대표·핵심 인력 의존','기타'],
+  q4exp:['있음','없음(몰랐음)','없음(알지만 조건·절차가 어려워서)'],
+  q4bad:['신청·정산 서류가 복잡','지원 시기가 맞지 않음','지원 내용이 현장과 다름','사후 관리·상담 부족','기타'],
+  q5lvl:['업무에 쓰고 있음','써 본 적 있음','관심은 있으나 시작 못함','필요성을 못 느낌'],
+  q5learn:['홍보물·소개서 제작','회의록·문서 작성','회계·정산 자동화','자료 정리·분석','고객 응대','기타'],
+  consent:['응답을 기업명 없이 통계·정책자료로 활용하는 데 동의합니다.','우수 활용 사례로 기업명을 공개하는 데 동의합니다.','후속 상담·지원 연계를 희망합니다.']
+};
+const CRIT = [
+  ['① 반복 빈도','월 1회 미만 1점 ~ 매주·매일 5점'],
+  ['② 작업 규칙성','매번 달라짐 1점 ~ 항상 같은 순서 5점'],
+  ['③ 디지털 자료 여부','종이 위주 1점 ~ 파일·계좌 내역 위주 5점'],
+  ['④ 소요 시간 부담','월 1시간 미만 1점 ~ 월 10시간 이상 5점'],
+  ['⑤ 오류 시 영향','영향 적음 1점 ~ 정산·보고에 큰 문제 5점']
+];
+const STEPS = ['시작','1부 기업 현황','2부 자동화 진단','3부 체크리스트','4부 현장 청취','결과'];
+const KEY_REC='sosang-diag-records-v1', KEY_DRAFT='sosang-diag-draft-v1';
+
+/* ───────── 상태 ───────── */
+const blank = ()=>({id:null,type:null,step:0,
+  meta:{name:'',date:new Date().toISOString().slice(0,10),writer:'',cert:[],year:'',regular:'',temp:'',vuln:'',sales:'',income:[],tools:[]},
+  auto:{method:[],freq:'',hours:'',people:'',steps:[],pains:[],sc:[0,0,0,0,0],others:[{n:'',f:'',t:'',p:''},{n:'',f:'',t:'',p:''},{n:'',f:'',t:'',p:''}]},
+  diff:{r:{},h:{},biz:'',extra:''},
+  ls:{rank:{},q1etc:'',q2:'',q3:'',q4exp:'',q4bad:[],q5lvl:'',q5learn:[],q6:'',consent:[],contact:''}});
+let S = load(KEY_DRAFT) || blank();
+let view='survey';
+
+function load(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+const saveDraft=()=>store(KEY_DRAFT,S);
+const records=()=>load(KEY_REC)||[];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* path get/set */
+function getp(o,p){return p.split('.').reduce((a,k)=>a==null?a:a[k],o)}
+function setp(o,p,v){const ks=p.split('.');const l=ks.pop();const t=ks.reduce((a,k)=>a[k],o);t[l]=v}
+
+/* ───────── 렌더 헬퍼 ───────── */
+function chips(path,opts,multi=true){
+  const cur=getp(S,path);
+  return `<div class="chips">${opts.map(o=>{
+    const on=multi?cur.includes(o):cur===o;
+    return `<label><input type="${multi?'checkbox':'radio'}" name="${path}" data-path="${path}" data-kind="${multi?'multi':'single'}" value="${esc(o)}" ${on?'checked':''}><span>${esc(o)}</span></label>`}).join('')}</div>`;
+}
+function rate(path,cur,name){
+  return `<div class="rate">${[1,2,3,4,5].map(n=>`<label><input type="radio" name="${name}" data-path="${path}" data-kind="rate" value="${n}" ${cur===n?'checked':''}><span>${n}</span></label>`).join('')}</div>`;
+}
+const txt=(path,ph='',type='text')=>`<input type="${type}" data-path="${path}" data-kind="text" value="${esc(getp(S,path))}" placeholder="${esc(ph)}">`;
+const area=(path,ph='')=>`<textarea data-path="${path}" data-kind="text" placeholder="${esc(ph)}">${esc(getp(S,path))}</textarea>`;
+
+function autoTotal(a=S.auto){return a.sc.reduce((x,y)=>x+y,0)}
+function tier(t){return t>=20?['hi','우선 자동화 권장']:t>=14?['mid','일부 자동화']:['lo','현행 유지·간소화 검토']}
+function itemAvgGroup(rec){
+  const T=TYPES[rec.type];
+  return T.groups.map(([g])=>{
+    const its=T.items.filter(i=>i.group===g);
+    const vals=its.map(i=>rec.diff.r[i.id]).filter(v=>v>0);
+    return {g,avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0,n:vals.length};
+  });
+}
+
+/* ───────── 설문 화면 ───────── */
+function progress(){
+  return `<div class="progress noprint">${STEPS.map((s,i)=>`<div class="${i<S.step?'done':''} ${i===S.step?'cur':''}"><i></i>${i===0?'시작':s.split(' ')[0]}</div>`).join('')}</div>`;
+}
+function navBtns(){
+  const last=S.step>=5;
+  return `<div class="nav"><button class="btn ghost" data-act="prev" ${S.step===0?'style="visibility:hidden"':''}>← 이전</button>${last?'':`<button class="btn" data-act="next">${S.step===4?'결과 보기':'다음'} →</button>`}</div>`;
+}
+
+function stepStart(){
+  return `<div class="card">
+   <h2>우리 기업의 업무, 함께 점검해 볼까요?</h2>
+   <p class="hint">AI·자동화로 시간을 줄일 수 있는 일을 확인하고 맞춤 개선안을 받아보세요. 약 10분 소요되며, 활동가가 함께 작성할 수 있습니다.</p>
+   <div class="row" style="margin:14px 0">
+     <div class="sug" style="margin:0"><b>1부 · 기업 현황 (2분)</b>인증 유형, 규모, 수입원, 업무 도구</div>
+     <div class="sug" style="margin:0"><b>2부 · 자동화 진단 (3분)</b>매출·비용 정리와 월간 보고</div>
+     <div class="sug" style="margin:0"><b>3부 · 어려움 체크리스트 (2분)</b>우리 유형에 맞는 문항</div>
+     <div class="sug" style="margin:0"><b>4부 · 현장 청취 (3분)</b>가장 큰 어려움과 바라는 점</div>
+   </div>
+   <h3 style="margin-top:6px">우리 기업의 유형을 선택하세요</h3>
+   <div class="typegrid">${Object.entries(TYPES).map(([k,t])=>`
+     <button class="typebtn ${S.type===k?'on':''}" data-act="type" data-v="${k}"><span class="badge">${k}형</span><b>${t.name}</b><em>${t.desc}</em></button>`).join('')}</div>
+   <p class="hint" style="margin-top:12px">유형이 애매하면 <b>C형</b>을 선택하고 4부 자유기재로 보완하세요. 1·2·4부는 모든 유형이 같고, 3부만 다릅니다.</p>
+   <div class="notice">수집한 정보는 일손덜기 상담·지원 목적으로만 사용하며, 목적 달성 후 파기합니다. 계좌번호 등 민감한 개인정보는 입력하지 마세요.</div>
+  </div>
+  <div class="nav"><span></span><button class="btn" data-act="next" ${S.type?'':'disabled style="opacity:.45;cursor:not-allowed"'}>시작하기 →</button></div>`;
+}
+
+function step1(){
+  return `<div class="card"><h2>1부. 기업 현황 <small style="font-weight:400;color:var(--sub)">약 2분</small></h2>
+  <p class="hint">${S.type}형 · ${TYPES[S.type].name}</p>
+  <div class="row"><div><label class="f">기업명</label>${txt('meta.name')}</div>
+   <div><label class="f">작성일</label>${txt('meta.date','','date')}</div>
+   <div><label class="f">작성자</label>${txt('meta.writer')}</div></div>
+  <label class="f">조직 유형 (복수 선택 가능)</label>${chips('meta.cert',OPT.cert)}
+  <label class="f">연 매출 규모</label>${chips('meta.sales',OPT.sales,false)}
+  <label class="f">주로 쓰는 업무 도구 (복수 선택)</label>${chips('meta.tools',OPT.tools)}
+  <details class="opt"><summary>더 자세히 적기 (선택)</summary>
+  <div class="row"><div><label class="f">설립 연도</label>${txt('meta.year','예: 2019','number')}</div></div>
+  <label class="f">상시 근로자 수 (명)</label>
+  <div class="row"><div><small class="hint">정규</small>${txt('meta.regular','','number')}</div><div><small class="hint">비정규·단기</small>${txt('meta.temp','','number')}</div><div><small class="hint">취약계층</small>${txt('meta.vuln','','number')}</div></div>
+  <label class="f">주요 수입원 (복수 선택)</label>${chips('meta.income',OPT.income)}
+  </details>
+  </div>`;
+}
+
+function step2(){
+  const a=S.auto,t=autoTotal(),[tc,tl]=tier(t);
+  return `<div class="card"><h2>2부. 반복업무 자동화 진단 <small style="font-weight:400;color:var(--sub)">약 3분</small></h2>
+  <p class="hint">대표 업무: <b>“매출·비용 내역 정리와 월간 실적 보고서 작성”</b> — 대부분의 기업이 매달 반복하며 자동화 효과가 큰 업무입니다.</p>
+  <label class="f">현재 방식</label>${chips('auto.method',OPT.method)}
+  <label class="f">빈도·시간</label>
+  <div class="row"><div><small class="hint">월 (회)</small>${txt('auto.freq','','number')}</div><div><small class="hint">1회당 약 (시간)</small>${txt('auto.hours','','number')}</div><div><small class="hint">담당자 (명: 대표·직원·외부)</small>${txt('auto.people','','number')}</div></div>
+  <h3>자동화 적합도 점수 <small style="font-weight:400;color:var(--sub)">(각 1~5점, 활동가와 함께 평가)</small></h3>
+  ${CRIT.map((c,i)=>`<div class="score"><div class="t"><b>${c[0]}</b><span>${c[1]}</span></div>${rate('auto.sc.'+i,a.sc[i],'sc'+i)}</div>`).join('')}
+  <div class="total"><div>합계 <b id="autoSum">${t}</b> / 25점</div><span class="tag ${tc}" id="autoTier">${t?tl:'점수를 입력하세요'}</span></div>
+  <div class="notice">20점 이상: 우선 자동화 권장 | 14~19점: 일부 자동화 | 13점 이하: 현행 유지·간소화 검토</div>
+  <details class="opt"><summary>더 자세히 적기 (선택)</summary>
+  <label class="f">업무 단계 중 시간이 많이 드는 곳</label>${chips('auto.steps',OPT.steps)}
+  <label class="f">불편·문제</label>${chips('auto.pains',OPT.pains)}
+  <h3>그 밖에 자동화하고 싶은 반복업무 <small style="font-weight:400;color:var(--sub)">(자유 기재)</small></h3>
+  <table class="others"><tr><th>업무명</th><th>빈도</th><th>1회 소요</th><th>불편한 점</th></tr>
+  ${a.others.map((o,i)=>`<tr><td>${txt(`auto.others.${i}.n`)}</td><td>${txt(`auto.others.${i}.f`,'월 2회')}</td><td>${txt(`auto.others.${i}.t`,'1시간')}</td><td>${txt(`auto.others.${i}.p`)}</td></tr>`).join('')}</table>
+  </details>
+  </div>`;
+}
+
+function step3(){
+  const T=TYPES[S.type];
+  return `<div class="card"><h2>3부. 업무 어려움 체크리스트 — ${T.name} <small style="font-weight:400;color:var(--sub)">약 2분</small></h2>
+  <p class="hint">각 항목의 어려움 정도를 <b>1(낮음) ~ 5(매우 높음)</b>로 표시하고, 외부 도움이 필요하면 ‘도움 필요’에 체크하세요. 해당 없는 항목은 비워 두세요. (선택한 점수를 다시 누르면 해제됩니다)</p>
+  ${(()=>{const blk=([g])=>`<h3>${g}</h3>${T.items.filter(i=>i.group===g).map(i=>`
+   <div class="item"><div class="q">${i.n}. ${i.q}</div>
+    <div class="ctl">${rate('diff.r.'+i.id,S.diff.r[i.id]||0,'r'+i.id)}
+    <label class="help"><input type="checkbox" data-path="diff.h.${i.id}" data-kind="bool" ${S.diff.h[i.id]?'checked':''}>도움 필요</label></div></div>`).join('')}`;
+   const more=T.groups.slice(3).some(([g])=>T.items.some(i=>i.group===g&&(S.diff.r[i.id]||S.diff.h[i.id])));
+   return T.groups.slice(0,3).map(blk).join('')+`<details class="opt" ${more?'open':''}><summary>나머지 영역도 점검하기 (선택)</summary>${T.groups.slice(3).map(blk).join('')}</details>`})()}
+  ${S.type==='C'?`<label class="f">우리 기업의 사업 형태를 설명해 주세요 (어떤 사업을 하고, 누구에게 가치를 전달하는지)</label>${area('diff.biz')}`:''}
+  <label class="f">이 밖에 위 목록에 없는 어려움</label>${area('diff.extra')}
+  </div>`;
+}
+
+function step4(){
+  const L=S.ls;
+  return `<div class="card"><h2>4부. 현장의 어려움 듣기 <small style="font-weight:400;color:var(--sub)">약 3분</small></h2>
+  <p class="hint">이 응답은 조직의 업무 실태를 파악하고 향후 지원 방안을 마련하는 기초자료로 활용됩니다. 편하게 말씀해 주세요.</p>
+  <label class="f">Q1. 지금 가장 큰 어려움 3가지를 골라 순위(1~3)를 정해 주세요.</label>
+  <div class="ranks">${OPT.q1.map(o=>`<div><span>${o}</span><select data-path="ls.rank.${esc(o)}" data-kind="rank" aria-label="${esc(o)} 순위"><option value="">—</option>${[1,2,3].map(n=>`<option value="${n}" ${L.rank[o]===n?'selected':''}>${n}순위</option>`).join('')}</select></div>`).join('')}</div>
+  <div style="margin-top:8px">${txt('ls.q1etc','‘기타’를 선택한 경우 내용')}</div>
+  <label class="f">Q2. 위 1순위 어려움이 구체적으로 어떤 상황인지 적어 주세요.</label>
+  <p class="hint" style="margin:0 0 6px">예: 납품처가 1곳뿐이라 거래가 끊기면 매출이 크게 줄어듭니다.</p>${area('ls.q2')}
+  <label class="f">Q5. AI·디지털 도구 활용 수준</label>${chips('ls.q5lvl',OPT.q5lvl,false)}
+  <label class="f">Q6. 일손덜기에 바라는 점, 어려움이 해결된다면 가장 먼저 하고 싶은 일</label>${area('ls.q6')}
+  <details class="opt"><summary>더 이야기하기 (선택)</summary>
+  <label class="f">Q3. 최근 1년간 시도했다가 포기했거나 어려웠던 일이 있다면 무엇인가요?</label>${area('ls.q3')}
+  <label class="f">Q4. 지원사업·제도 이용 경험 — 참여 경험</label>${chips('ls.q4exp',OPT.q4exp,false)}
+  <label class="f">아쉬웠던 점</label>${chips('ls.q4bad',OPT.q4bad)}
+  <label class="f">배우고 싶은 분야</label>${chips('ls.q5learn',OPT.q5learn)}
+  </details>
+  <h3>동의 및 후속 연계</h3>${chips('ls.consent',OPT.consent)}
+  <label class="f">연락처 (후속 상담을 희망하는 경우)</label>${txt('ls.contact','','tel')}
+  <div class="notice">수집한 정보는 일손덜기 상담·지원 목적으로만 사용하며, 목적 달성 후 파기합니다.</div>
+  </div>`;
+}
+
+/* ───────── 결과 / 즉시 환류 ───────── */
+const STEP_TIPS={
+ '영수증·거래명세서 모으기':['④','영수증 사진을 읽어 표에 자동 입력(OCR 활용). 사진을 한 폴더에 모으는 습관부터 시작하세요.'],
+ '내용을 엑셀에 옮겨 적기':['②','계좌·카드 내역을 파일로 내려받아 붙여 넣으면 손으로 옮겨 적을 필요가 없습니다.'],
+ '항목 분류·계정 정리':['②','내려받은 내역을 AI에 넣어 항목별로 분류한 뒤 담당자가 확인합니다.'],
+ '합계·검산':['①','엑셀·구글시트의 합계·SUMIF 수식을 한 번 만들어 두면 매달 자동 계산됩니다.'],
+ '보고서·정산 서식에 다시 옮기기':['①','표준 템플릿 한 곳에만 입력하고 보고서 서식은 그 값을 불러오도록 연결합니다.'],
+ '보고서 문장 쓰기':['③','정리된 숫자를 AI에 넣어 월간 보고서 문장·서식 초안을 자동 생성합니다.'],
+ '제출·공유':['①','공유 폴더(구글 드라이브 등)와 제출 체크리스트를 한 곳에 정리합니다.']
+};
+const PAIN_TIPS={
+ '담당자 한 명에게 의존':'작업 순서를 체크리스트로 문서화하고 템플릿을 공유하면 대표·직원 누구나 할 수 있습니다.',
+ '마감 직전 몰림':'매주 10분씩 내역을 미리 정리하는 ‘주간 입력’ 습관과 알림을 설정해 보세요.',
+ '입력 오류·누락':'드롭다운 목록과 합계 검산 수식을 넣어 오류를 줄이세요.',
+ '같은 내용을 여러 번 입력':'한 번 입력한 값을 시트 연결로 재사용하세요.',
+ '자료가 여러 곳에 흩어짐':'파일·사진·카톡 자료를 한 공유 폴더로 모으세요.',
+ '양식이 자주 바뀜':'원본 데이터는 그대로 두고 제출 양식만 바꿔 끼우는 구조로 만드세요.'
+};
+function feedback(rec){
+  const a=rec.auto,t=autoTotal(a),[tc,tl]=tier(t);
+  let h=`<h3>2부 결과 — 자동화 적합도</h3>
+   <div class="total"><div>합계 <b>${t}</b> / 25점</div><span class="tag ${tc}">${tl}</span></div>`;
+  const msg={hi:'반복 빈도와 규칙성이 높아 자동화 효과가 큽니다. AI 자동화 시범 사례 대상으로 우선 추천됩니다.',mid:'일부 단계(합계·분류·문장 초안)부터 부분 자동화를 적용해 보세요.',lo:'자동화보다 양식을 간소화하고 현재 방식을 정돈하는 것이 먼저입니다.'};
+  h+=`<p>${t?msg[tc]:'점수가 입력되지 않았습니다.'}</p>`;
+  const tips=a.steps.filter(s=>STEP_TIPS[s]);
+  if(tips.length){h+=`<h3>시간이 많이 드는 단계별 개선 제안</h3>`+tips.map(s=>`<div class="sug"><b>${esc(s)} → 자동화 방식 ${STEP_TIPS[s][0]}</b>${STEP_TIPS[s][1]}</div>`).join('');}
+  else h+=`<div class="sug"><b>추천 시작점 · 방식 ①</b>표준 엑셀·구글시트 템플릿과 수식으로 합계·분류를 자동화하는 가장 쉬운 방법부터 시작하세요.</div>`;
+  const pains=a.pains.filter(p=>PAIN_TIPS[p]);
+  if(pains.length)h+=pains.map(p=>`<div class="sug warn"><b>${esc(p)}</b>${PAIN_TIPS[p]}</div>`).join('');
+  if(t>=14){
+    h+=`<h3>따라 쓸 수 있는 프롬프트 예시 (방식 ③)</h3>
+    <pre class="prompt">아래는 이번 달 우리 기업의 매출·비용을 항목별로 정리한 표입니다.
+이 숫자를 바탕으로 ① 이번 달 요약 3줄 ② 전월 대비 눈에 띄는 변화 ③ 다음 달 점검할 점을 월간 실적 보고서 문장으로 작성해 주세요.
+숫자는 바꾸지 말고, 모르는 내용은 추측하지 말아 주세요.
+
+[여기에 표 붙여넣기 — 계좌번호·개인정보는 지우고 붙여넣기]</pre>`;
+  }
+  h+=`<div class="notice"><b>유의</b> 회계 처리의 최종 판단은 세무사 등 전문가나 담당자가 확인하고, 개인정보와 계좌번호는 AI에 입력하지 않습니다.</div>`;
+  const oth=a.others.filter(o=>o.n.trim());
+  if(oth.length)h+=`<h3>대체 자동화 후보 업무</h3><ul>${oth.map(o=>`<li><b>${esc(o.n)}</b> ${[o.f,o.t].filter(Boolean).map(esc).join(' · ')} ${o.p?'— '+esc(o.p):''}</li>`).join('')}</ul>`;
+  return h;
+}
+function difficultyBlock(rec){
+  const T=TYPES[rec.type],rs=rec.diff.r,hs=rec.diff.h;
+  const rated=T.items.filter(i=>rs[i.id]>0).sort((a,b)=>rs[b.id]-rs[a.id]||(hs[b.id]?1:0)-(hs[a.id]?1:0));
+  let h=`<h3>3부 결과 — 영역별 어려움 평균</h3>`;
+  const g=itemAvgGroup(rec);
+  h+=g.map(x=>`<div class="kv"><span>${esc(x.g)}</span><div class="bar acc"><i style="width:${x.avg/5*100}%"></i></div><b class="num">${x.n?x.avg.toFixed(1):'-'}</b></div>`).join('');
+  if(rated.length){
+    h+=`<h3>가장 어려운 항목 TOP ${Math.min(5,rated.length)}</h3><table class="data"><tr><th>항목</th><th class="num">점수</th><th>연결 가능한 지원</th></tr>`+
+      rated.slice(0,5).map(i=>`<tr><td>${i.n}. ${esc(i.q)}${hs[i.id]?' <span class="tag hi">도움 필요</span>':''}</td><td class="num">${rs[i.id]}</td><td>${esc(i.sup)}</td></tr>`).join('')+`</table>`;
+  } else h+=`<p class="hint">입력된 어려움 점수가 없습니다.</p>`;
+  return h;
+}
+function q1Block(rec){
+  const r=Object.entries(rec.ls.rank).filter(([,v])=>v).sort((a,b)=>a[1]-b[1]);
+  if(!r.length)return '';
+  return `<h3>4부 — 가장 큰 어려움 3순위</h3><ol>${r.map(([k,v])=>`<li>${esc(k)}${k==='기타'&&rec.ls.q1etc?` (${esc(rec.ls.q1etc)})`:''}</li>`).join('')}</ol>`+
+    (rec.ls.q2?`<p class="hint">구체적 상황: ${esc(rec.ls.q2)}</p>`:'');
+}
+function stepResult(){
+  const rec=S;
+  const saved=records().some(r=>r.id===S.id);
+  return `<div class="card" id="resultCard">
+   <h2>맞춤 개선 제안 <span class="tag lo" style="vertical-align:middle">${S.type}형 ${TYPES[S.type].name}</span></h2>
+   <p class="hint">${esc(S.meta.name||'(기업명 미입력)')} · ${esc(S.meta.date)} ${S.meta.writer?'· 작성자 '+esc(S.meta.writer):''}</p>
+   ${feedback(rec)}${difficultyBlock(rec)}${q1Block(rec)}
+   <div class="printonly" style="margin-top:18px;border-top:1px solid #999;padding-top:8px;text-align:center">소생커뮤니티 · 일손덜기 프로젝트</div>
+   <div class="btns noprint">
+     <button class="btn" data-act="save">${saved?'✔ 저장됨 (다시 저장하면 덮어씁니다)':'응답 저장하기'}</button>
+     <button class="btn ghost" data-act="print">개선 제안 1장 인쇄·PDF</button>
+     <button class="btn ghost" data-act="new">새 진단 시작</button>
+   </div>
+   <div class="notice noprint">‘응답 저장하기’를 누르면 이 기기의 ‘응답 모음·집계’에 기록됩니다. 통계 활용 동의가 없는 응답은 집계에서 제외됩니다.</div>
+  </div>
+  <div class="nav noprint"><button class="btn ghost" data-act="prev">← 4부로 돌아가기</button><span></span></div>`;
+}
+
+/* ───────── 응답 모음·집계 ───────── */
+let filterType='ALL';
+function stepRecords(){
+  const all=records();
+  const recs=filterType==='ALL'?all:all.filter(r=>r.type===filterType);
+  const stat=recs.filter(r=>r.ls.consent.includes(OPT.consent[0]));
+  let h=`<div class="card"><h2>응답 모음·집계</h2>
+   <p class="hint">저장된 응답 ${all.length}건 (이 기기 기준). 소수 기업 응답은 대표성이 낮으므로 ‘경향’으로 해석하세요.</p>
+   <div class="chips" style="margin-bottom:10px">${[['ALL','전체'],...Object.entries(TYPES).map(([k,t])=>[k,`${k}형 ${t.name}`])].map(([k,n])=>`<label><input type="radio" name="ft" value="${k}" data-act="filter" ${filterType===k?'checked':''}><span>${n} (${k==='ALL'?all.length:all.filter(r=>r.type===k).length})</span></label>`).join('')}</div>`;
+  if(!all.length){return h+`<div class="empty">아직 저장된 응답이 없습니다.<br>‘진단하기’에서 결과 화면의 ‘응답 저장하기’를 눌러 주세요.</div></div>`}
+  h+=`<div class="btns" style="margin-top:0"><button class="btn sm" data-act="csv">CSV 내려받기</button><button class="btn sm ghost" data-act="backup">백업(JSON)</button><label class="btn sm ghost" style="display:inline-block">백업 불러오기<input type="file" accept=".json" data-act="restore" hidden></label><button class="btn sm warn" data-act="wipe">전체 삭제</button></div></div>`;
+
+  h+=`<div class="card"><h3 style="margin-top:0">응답 목록</h3><div style="overflow-x:auto"><table class="data"><tr><th>기업명</th><th>유형</th><th>작성일</th><th class="num">자동화</th><th>통계동의</th><th></th></tr>
+   ${recs.map(r=>{const t=autoTotal(r.auto);return `<tr><td>${esc(r.meta.name||'(무기명)')}</td><td>${r.type}형</td><td>${esc(r.meta.date)}</td><td class="num">${t}점 <span class="tag ${tier(t)[0]}">${tier(t)[1]}</span></td><td>${r.ls.consent.includes(OPT.consent[0])?'○':'×'}</td><td style="white-space:nowrap"><button class="btn sm ghost" data-act="open" data-id="${r.id}">열기</button> <button class="btn sm ghost" data-act="del" data-id="${r.id}">삭제</button></td></tr>`}).join('')}</table></div></div>`;
+
+  if(filterType==='ALL'){h+=`<div class="card"><p class="hint" style="margin:0">유형별 문항이 다르므로 어려움 집계는 위에서 유형(A·B·C)을 선택하면 표시됩니다.</p></div>`;}
+  else if(!stat.length){h+=`<div class="card"><p class="hint" style="margin:0">통계 활용에 동의한 응답이 없어 집계를 표시할 수 없습니다. (현재 ${recs.length}건)</p></div>`;}
+  else{
+    const T=TYPES[filterType];
+    const rows=T.items.map(i=>{
+      const v=stat.map(r=>r.diff.r[i.id]).filter(x=>x>0);
+      const hp=stat.filter(r=>r.diff.h[i.id]).length;
+      return {i,n:v.length,avg:v.length?v.reduce((a,b)=>a+b,0)/v.length:0,help:hp};
+    });
+    const ga=T.groups.map(([g])=>{const rs=rows.filter(r=>r.i.group===g&&r.n);const s=rs.reduce((a,r)=>a+r.avg*r.n,0),c=rs.reduce((a,r)=>a+r.n,0);return {g,avg:c?s/c:0}});
+    const q1={};stat.forEach(r=>Object.entries(r.ls.rank).forEach(([k,v])=>{if(v)q1[k]=(q1[k]||0)+(4-v)}));
+    const q1s=Object.entries(q1).sort((a,b)=>b[1]-a[1]);
+    const autoRank=[...stat].sort((a,b)=>autoTotal(b.auto)-autoTotal(a.auto));
+    const sum=(f)=>{const m={};stat.forEach(r=>(f(r)||[]).forEach(x=>m[x]=(m[x]||0)+1));return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+    const cnt=(arr)=>arr.length?arr.map(([k,n])=>`${esc(k)} ${n}곳`).join(' · '):'-';
+    h+=`<div class="card"><h2>${filterType}형 ${T.name} 집계 <span class="tag lo">응답 ${stat.length}곳</span></h2>
+     <p class="hint">통계 활용에 동의한 응답만 집계합니다. 표본 수(${stat.length}곳)를 함께 공개하세요.</p>
+     <h3>영역별 평균 어려움 점수</h3>${ga.map(x=>`<div class="kv"><span>${esc(x.g)}</span><div class="bar acc"><i style="width:${x.avg/5*100}%"></i></div><b class="num">${x.avg?x.avg.toFixed(1):'-'}</b></div>`).join('')}
+     <h3>문항별 평균 · 도움 필요 비율</h3><div style="overflow-x:auto"><table class="data"><tr><th>문항</th><th class="num">평균</th><th class="num">도움 필요</th></tr>
+     ${[...rows].sort((a,b)=>b.avg-a.avg).map(r=>`<tr><td>${r.i.n}. ${esc(r.i.q)}<br><small style="color:var(--sub)">${esc(r.i.group)}</small></td><td class="num">${r.n?r.avg.toFixed(1):'-'}</td><td class="num">${Math.round(r.help/stat.length*100)}%</td></tr>`).join('')}</table></div>
+     <h3>4부 Q1 가장 큰 어려움 (1순위 3점·2순위 2점·3순위 1점 합산)</h3>
+     ${q1s.length?q1s.map(([k,v])=>`<div class="kv"><span>${esc(k)}</span><div class="bar"><i style="width:${v/q1s[0][1]*100}%"></i></div><b class="num">${v}</b></div>`).join(''):'<p class="hint">응답 없음</p>'}
+     <h3>자동화 후보 업무 순위 (2부 점수)</h3><table class="data"><tr><th>기업</th><th class="num">점수</th><th>판정</th></tr>
+     ${autoRank.map(r=>{const t=autoTotal(r.auto);return `<tr><td>${esc(r.meta.name||'(무기명)')}</td><td class="num">${t}</td><td><span class="tag ${tier(t)[0]}">${tier(t)[1]}</span></td></tr>`}).join('')}</table>
+     <h3>기타 분포</h3>
+     <p><b>AI 활용 수준</b> ${cnt(sum(r=>r.ls.q5lvl?[r.ls.q5lvl]:[]))}</p>
+     <p><b>배우고 싶은 분야</b> ${cnt(sum(r=>r.ls.q5learn))}</p>
+     <p><b>지원사업 참여</b> ${cnt(sum(r=>r.ls.q4exp?[r.ls.q4exp]:[]))}</p>
+     <p><b>지원사업 아쉬운 점</b> ${cnt(sum(r=>r.ls.q4bad))}</p>
+     <p><b>주요 수입원</b> ${cnt(sum(r=>r.meta.income))}</p>
+    </div>`;
+  }
+  return h;
+}
+
+/* ───────── 화면 제어 ───────── */
+function render(){
+  const app=$('#app');
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
+  if(view==='records'){app.innerHTML=stepRecords();return}
+  const fn=[stepStart,step1,step2,step3,step4,stepResult][S.step];
+  app.innerHTML=(S.step>0?progress():'')+fn()+(S.step>0&&S.step<5?navBtns():'');
+  window.scrollTo({top:0});
+}
+function go(n){S.step=n;saveDraft();render()}
+
+document.addEventListener('click',e=>{
+  const tabBtn=e.target.closest('#tabs button');
+  if(tabBtn){view=tabBtn.dataset.view;render();return}
+  /* 별점 재클릭 해제 */
+  const rin=e.target.closest('.rate input');
+  if(rin){
+    if(rin.dataset.was==='1'){rin.checked=false;rin.dataset.was='';apply(rin)}
+    return
+  }
+  const b=e.target.closest('[data-act]');
+  if(!b||b.tagName==='INPUT')return;
+  const act=b.dataset.act;
+  if(act==='type'){S.type=b.dataset.v;saveDraft();render()}
+  else if(act==='next'){
+    if(S.step===0&&!S.type)return;
+    go(S.step+1)}
+  else if(act==='prev')go(S.step-1);
+  else if(act==='print')window.print();
+  else if(act==='save'){
+    if(!S.id)S.id='r'+Date.now().toString(36);
+    const list=records().filter(r=>r.id!==S.id);list.push(JSON.parse(JSON.stringify(S)));
+    toast(store(KEY_REC,list)?'저장했습니다':'저장에 실패했습니다');saveDraft();render()}
+  else if(act==='new'){
+    if(confirm('현재 작성 중인 내용을 비우고 새 진단을 시작할까요? (저장한 응답은 유지됩니다)')){S=blank();saveDraft();render()}}
+  else if(act==='open'){const r=records().find(x=>x.id===b.dataset.id);if(r){S=JSON.parse(JSON.stringify(r));S.step=5;saveDraft();view='survey';render()}}
+  else if(act==='del'){if(confirm('이 응답을 삭제할까요?')){store(KEY_REC,records().filter(r=>r.id!==b.dataset.id));render()}}
+  else if(act==='wipe'){if(confirm('저장된 모든 응답을 삭제합니다. 되돌릴 수 없습니다. 계속할까요?')){store(KEY_REC,[]);render()}}
+  else if(act==='csv')exportCSV();
+  else if(act==='backup'){download('업무진단_백업_'+today()+'.json',JSON.stringify(records(),null,1),'application/json')}
+});
+document.addEventListener('pointerdown',e=>{
+  const rin=e.target.closest('.rate label')?.querySelector('input');
+  if(rin)rin.dataset.was=rin.checked?'1':'';
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.act==='filter'){filterType=t.value;render();return}
+  if(t.dataset.act==='restore'){
+    const f=t.files[0];if(!f)return;
+    f.text().then(s=>{try{const arr=JSON.parse(s);const cur=records();const ids=new Set(cur.map(r=>r.id));arr.forEach(r=>{if(r&&r.id&&r.type&&TYPES[r.type]&&!ids.has(r.id))cur.push(r)});store(KEY_REC,cur);toast('불러왔습니다');render()}catch(_){toast('올바른 백업 파일이 아닙니다')}});
+    return}
+  if(t.dataset.path)apply(t);
+});
+document.addEventListener('input',e=>{if(e.target.dataset.kind==='text')apply(e.target)});
+
+function apply(el){
+  const p=el.dataset.path,k=el.dataset.kind;
+  if(k==='text')setp(S,p,el.value);
+  else if(k==='single')setp(S,p,el.value);
+  else if(k==='multi'){const arr=getp(S,p);const i=arr.indexOf(el.value);if(el.checked&&i<0)arr.push(el.value);if(!el.checked&&i>=0)arr.splice(i,1)}
+  else if(k==='bool')setp(S,p,el.checked);
+  else if(k==='rate'){setp(S,p,el.checked?+el.value:0);if(p.startsWith('auto.sc'))updateScore()}
+  else if(k==='rank'){
+    const v=el.value?+el.value:0;
+    if(v)for(const o in S.ls.rank)if(S.ls.rank[o]===v)S.ls.rank[o]=0;
+    const name=p.slice('ls.rank.'.length);S.ls.rank[name]=v;
+    document.querySelectorAll('select[data-kind=rank]').forEach(s=>{const n=s.dataset.path.slice(8);s.value=S.ls.rank[n]||''});
+  }
+  saveDraft();
+}
+function updateScore(){
+  const t=autoTotal(),[c,l]=tier(t);
+  $('#autoSum').textContent=t;const tg=$('#autoTier');tg.className='tag '+c;tg.textContent=t?l:'점수를 입력하세요';
+}
+
+/* ───────── 내보내기 ───────── */
+const today=()=>new Date().toISOString().slice(0,10);
+function download(name,data,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:mime+';charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+function exportCSV(){
+  const recs=records();
+  const head=['id','유형','기업명','작성일','작성자','인증유형','설립연도','정규','비정규','취약계층','연매출','수입원','업무도구','현재방식','월횟수','회당시간','담당자수','시간드는단계','불편','점수1','점수2','점수3','점수4','점수5','합계','판정'];
+  const maxItems=Math.max(...Object.values(TYPES).map(t=>t.items.length));
+  for(let i=1;i<=maxItems;i++)head.push('Q3_'+i+'_점수','Q3_'+i+'_도움');
+  head.push('사업형태(C)','기타어려움','Q1_1순위','Q1_2순위','Q1_3순위','Q2','Q3','Q4참여','Q4아쉬운점','Q5수준','Q5배우고싶은','Q6','통계동의','명칭공개동의','후속연계','연락처');
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const rows=recs.map(r=>{
+    const a=r.auto,m=r.meta,t=autoTotal(a),T=TYPES[r.type];
+    const row=[r.id,r.type,m.name,m.date,m.writer,m.cert.join('/'),m.year,m.regular,m.temp,m.vuln,m.sales,m.income.join('/'),m.tools.join('/'),a.method.join('/'),a.freq,a.hours,a.people,a.steps.join('/'),a.pains.join('/'),...a.sc,t,tier(t)[1]];
+    for(let i=1;i<=maxItems;i++){const id=r.type+i;const ex=T.items.some(x=>x.id===id);row.push(ex?(r.diff.r[id]||''):'',ex?(r.diff.h[id]?'Y':''):'')}
+    const rk=n=>Object.entries(r.ls.rank).find(([,v])=>v===n)?.[0]||'';
+    row.push(r.diff.biz,r.diff.extra,rk(1),rk(2),rk(3),r.ls.q2,r.ls.q3,r.ls.q4exp,r.ls.q4bad.join('/'),r.ls.q5lvl,r.ls.q5learn.join('/'),r.ls.q6,r.ls.consent.includes(OPT.consent[0])?'Y':'',r.ls.consent.includes(OPT.consent[1])?'Y':'',r.ls.consent.includes(OPT.consent[2])?'Y':'',r.ls.contact);
+    return row.map(q).join(',');
+  });
+  download('업무진단_응답_'+today()+'.csv','﻿'+[head.map(q).join(','),...rows].join('\r\n'),'text/csv');
+}
+
+/* 사용 안내 */
+const gd=$('#guide');
+$('#guideOpen').addEventListener('click',()=>gd.showModal());
+$('#guideClose').addEventListener('click',()=>gd.close());
+gd.addEventListener('click',e=>{if(e.target===gd)gd.close()});
+gd.querySelectorAll('.gtabs button').forEach(b=>b.addEventListener('click',()=>{
+  gd.querySelectorAll('.gtabs button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#g-manual').hidden=b.dataset.g!=='manual';$('#g-story').hidden=b.dataset.g!=='story';
+}));
+
+render();
+</script>
+</body>
+</html>
+
